@@ -15,18 +15,23 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private ArrayList<String> items;
     private ArrayAdapter<String> itemsAdapter;
     private ListView lvItems;
     private final int REQUEST_CODE = 20;
+    private boolean storeInDb = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         lvItems = (ListView)findViewById(R.id.lvItems);
-        readItems();
+        if(!storeInDb)
+            readItems();
+        else
+            readItemsFromDB();
         itemsAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, items);
         lvItems.setAdapter(itemsAdapter);
         setupListViewListener();
@@ -38,7 +43,10 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onItemLongClick(AdapterView<?> Adapter, View item, int pos, long id) {
                         items.remove(pos);
                         itemsAdapter.notifyDataSetChanged();
-                        writeItems();
+                        if(!storeInDb)
+                            writeItems();
+                        else
+                            writeItemsToDB();
                         return true;
                     }
                 }
@@ -71,7 +79,10 @@ public class MainActivity extends AppCompatActivity {
             items.remove(position);
             items.add(position,name);
             itemsAdapter.notifyDataSetChanged();
-            writeItems();
+            if(!storeInDb)
+                writeItems();
+            else
+                writeItemsToDB();
         }
     }
 
@@ -95,12 +106,39 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    private void readItemsFromDB() {
+        try {
+            List<Item> itemFromDB = Item.getAll();
+            items = new ArrayList<String>();
+            if( itemFromDB.size() > 0 )
+                for (int i=0; i<itemFromDB.size(); i++) {
+                    items.add(itemFromDB.get(i).name);
+                }
+        } catch(Exception e) {
+            items = new ArrayList<String>();
+        }
+
+    }
+
+    private void writeItemsToDB() {
+       for(int i=0; i<items.size(); i++) {
+           Item item = new Item();
+           item.remoteId = i;
+           item.name = items.get(i);
+           item.save();
+       }
+    }
+
     public void onAddItem(View view) {
         EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
         String newItemText = etNewItem.getText().toString();
         if(!newItemText.equals(""))
             itemsAdapter.add(newItemText);
             etNewItem.setText("");
-            writeItems();
+            if(!storeInDb)
+                writeItems();
+            else
+                writeItemsToDB();
     }
 }
