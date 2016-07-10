@@ -18,11 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private ArrayList<String> items;
-    private ArrayAdapter<String> itemsAdapter;
+    private ArrayList<Item> items;
+    private ArrayAdapter itemsAdapter;
     private ListView lvItems;
     private final int REQUEST_CODE = 20;
     private boolean storeInDb = true;
+    private boolean useCustomItemAdapter = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,8 +33,15 @@ public class MainActivity extends AppCompatActivity {
             readItems();
         else
             readItemsFromDB();
-        itemsAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, items);
+        if(!useCustomItemAdapter) {
+            itemsAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, items);
+        } else {
+            ToDoItemAdapter toDoItemAdapter = new ToDoItemAdapter(this, items);
+            // Attach the adapter to a ListView
+            itemsAdapter = toDoItemAdapter;
+        }
         lvItems.setAdapter(itemsAdapter);
+
         setupListViewListener();
     }
     public void setupListViewListener() {
@@ -57,8 +65,15 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(AdapterView<?> Adapter, View item, int pos, long id) {
                         Intent i = new Intent(MainActivity.this, EditItemActivity.class);
-                        String selectedFromList = (String)lvItems.getItemAtPosition(pos);
+                        String selectedFromList;
+                        if(!useCustomItemAdapter) {
+                            selectedFromList = lvItems.getItemAtPosition(pos).toString();
+                        } else {
+                            Item itemFromList = (Item) lvItems.getItemAtPosition(pos);
+                            selectedFromList = itemFromList.name;
+                        }
                         i.putExtra("item", selectedFromList);
+
                         i.putExtra("pos", pos);
                         startActivityForResult(i,REQUEST_CODE);
                     }
@@ -77,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
             Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
             items.remove(position);
-            items.add(position,name);
+            items.add(position,new Item(0,name));
             itemsAdapter.notifyDataSetChanged();
             if(!storeInDb)
                 writeItems();
@@ -89,12 +104,25 @@ public class MainActivity extends AppCompatActivity {
     private void readItems() {
         File filesDir = getFilesDir();
         File todoFile = new File(filesDir,"todo.txt");
+        ArrayList<String> itemsFromText;
         try {
-            items = new ArrayList<String>(FileUtils.readLines(todoFile));
+            itemsFromText = new ArrayList<String>(FileUtils.readLines(todoFile));
+            items = convertToItemObject(itemsFromText);
         } catch(IOException e) {
-            items = new ArrayList<String>();
+            items = new ArrayList<Item>();
         }
 
+    }
+
+    private ArrayList<Item> convertToItemObject(ArrayList<String> itemsFromText) {
+        ArrayList<Item> items = new ArrayList<Item>();
+        for(int i=0; i<itemsFromText.size(); i++) {
+            Item item = new Item();
+            item.remoteId = i;
+            item.name = itemsFromText.get(i);
+            items.add(item);
+        }
+        return items;
     }
 
     private void writeItems() {
@@ -110,13 +138,13 @@ public class MainActivity extends AppCompatActivity {
     private void readItemsFromDB() {
         try {
             List<Item> itemFromDB = Item.getAll();
-            items = new ArrayList<String>();
+            items = new ArrayList<Item>();
             if( itemFromDB.size() > 0 )
                 for (int i=0; i<itemFromDB.size(); i++) {
-                    items.add(itemFromDB.get(i).name);
+                    items.add(itemFromDB.get(i));
                 }
         } catch(Exception e) {
-            items = new ArrayList<String>();
+            items = new ArrayList<Item>();
         }
 
     }
@@ -125,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
        for(int i=0; i<items.size(); i++) {
            Item item = new Item();
            item.remoteId = i;
-           item.name = items.get(i);
+           item.name = items.get(i).name;
            item.save();
        }
     }
@@ -133,12 +161,17 @@ public class MainActivity extends AppCompatActivity {
     public void onAddItem(View view) {
         EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
         String newItemText = etNewItem.getText().toString();
-        if(!newItemText.equals(""))
-            itemsAdapter.add(newItemText);
+        if(!newItemText.equals("")) {
+            itemsAdapter.add(new Item(newItemText));
             etNewItem.setText("");
-            if(!storeInDb)
+            if (!storeInDb)
                 writeItems();
             else
                 writeItemsToDB();
+        } else {
+
+            Toast.makeText(this, "Add a non-empty todo", Toast.LENGTH_SHORT).show();
+
+        }
     }
 }
