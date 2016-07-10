@@ -16,7 +16,6 @@ public class Item extends Model {
     @Column(name = "Name")
     public String name;
 
-
     // Make sure to have a default constructor for every ActiveAndroid model
     public Item(){
         super();
@@ -28,6 +27,11 @@ public class Item extends Model {
         this.name = name;
     }
 
+    public Item( String name){
+        super();
+        this.name = name;
+    }
+
     public static List<Item> getAll() {
         // This is how you execute a query
         return new Select()
@@ -36,4 +40,8 @@ public class Item extends Model {
                 .execute();
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
 }
