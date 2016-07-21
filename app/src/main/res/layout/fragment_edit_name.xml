@@ -3,10 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="sdass.simpletodo.EditNameDialogFragment">
 
     <Button
@@ -14,7 +12,7 @@
         android:layout_height="wrap_content"
         android:text="@string/save"
         android:id="@+id/btnSave"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="0dp"
         android:layout_below="@+id/dpDatePicker"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
@@ -40,6 +38,14 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
+    <Spinner
+        android:id="@+id/spPriority"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etEditItem"
+        android:background="@android:drawable/btn_dropdown"
+        android:spinnerMode="dropdown" />
+
     <DatePicker
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,7 +53,7 @@
         android:layout_marginTop="42dp"
         android:spinnersShown="true"
         android:calendarViewShown="false"
-        android:layout_below="@+id/etEditItem"
+        android:layout_below="@+id/spPriority"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 

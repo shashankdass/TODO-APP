@@ -1,30 +1,29 @@
 package sdass.simpletodo;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Spinner;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class EditNameDialogFragment extends DialogFragment  {
+public class EditNameDialogFragment extends DialogFragment  implements AdapterView.OnItemSelectedListener {
 
     private static int item_pos;
     private EditText etEditItem ;
     private DatePicker dpDatePicker;
     public String defaultDueDate = "2011-01-01";
     private Button b;
+    private String priority="Low";
 
     public EditNameDialogFragment() {
         // Empty constructor is required for DialogFragment
@@ -32,8 +31,18 @@ public class EditNameDialogFragment extends DialogFragment  {
         // Use `newInstance` instead as shown below
     }
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long l) {
+        priority = (String) parent.getItemAtPosition(pos);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
     public interface EditNameDialogListener {
-        void onFinishEditDialog(String editedValue, String date, int pos);
+        void onFinishEditDialog(String editedValue, String date, int pos, String priority);
     }
     private EditNameDialogListener caller;
 
@@ -44,6 +53,7 @@ public class EditNameDialogFragment extends DialogFragment  {
         args.putString("value",todo.name);
         args.putString("date",todo.dueDate);
         args.putString("pos",todo.dueDate);
+        args.putString("priority", todo.priority);
         frag.setArguments(args);
         return frag;
     }
@@ -52,18 +62,28 @@ public class EditNameDialogFragment extends DialogFragment  {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        return inflater.inflate(R.layout.fragment_edit_name, container);
+            return inflater.inflate(R.layout.fragment_edit_name, container);
     }
 
     @Override
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Spinner spinner = (Spinner) view.findViewById(R.id.spPriority);
+        spinner.setOnItemSelectedListener(this);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this.getContext(),
+                R.array.priority_value, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
         // Get field from view
         etEditItem = (EditText) view.findViewById(R.id.etEditItem);
         dpDatePicker = (DatePicker) view.findViewById(R.id.dpDatePicker);
         // Fetch arguments from bundle and set title
         String value = getArguments().getString("value", "");
         String date = getArguments().getString("date","");
+        String priority = getArguments().getString("priority","");
+        int spinnerPosition = adapter.getPosition(priority);
+        spinner.setSelection(spinnerPosition);
+
         etEditItem.setText(value);        // Show soft keyboard automatically and request focus to field
         int day;
         int month;
@@ -80,8 +100,6 @@ public class EditNameDialogFragment extends DialogFragment  {
         dpDatePicker.init(year, month - 1, day, null);
 
         etEditItem.requestFocus();
-        getDialog().getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         b = (Button) view.findViewById(R.id.btnSave);
         b.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,6 +113,8 @@ public class EditNameDialogFragment extends DialogFragment  {
     public void onEditedItemSaveFragment(View view) {
         etEditItem = (EditText)view.findViewById(R.id.etEditItem);
         dpDatePicker = (DatePicker) view.findViewById(R.id.dpDatePicker);
+
+
         int day = dpDatePicker.getDayOfMonth();
         int month = dpDatePicker.getMonth();
         int year =  dpDatePicker.getYear();
@@ -105,7 +125,7 @@ public class EditNameDialogFragment extends DialogFragment  {
         String dateString = sdf.format(calendar.getTime());
 
         EditNameDialogListener listener = (EditNameDialogListener) getActivity();
-        listener.onFinishEditDialog(etEditItem.getText().toString(), dateString, item_pos);
+        listener.onFinishEditDialog(etEditItem.getText().toString(), dateString, item_pos, priority);
 
     }
 }
