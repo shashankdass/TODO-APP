@@ -7,10 +7,4 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
-
-    <style name="LargeRedFont">
-        <item name="android:textColor">#C80000</item>
-        <item name="android:textSize">40sp</item>
-    </style>
-
 </resources>
