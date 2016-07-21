@@ -7,15 +7,15 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="sdass.simpletodo.EditItemActivity">
+    tools:context="sdass.simpletodo.EditNameDialogFragment">
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/save"
         android:id="@+id/btnSave"
-        android:onClick="onEditedItemSave"
-        android:layout_alignTop="@+id/dpDatePicker"
+        android:layout_marginTop="32dp"
+        android:layout_below="@+id/dpDatePicker"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
@@ -44,11 +44,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/dpDatePicker"
-        android:layout_marginTop="69dp"
+        android:layout_marginTop="42dp"
         android:spinnersShown="true"
         android:calendarViewShown="false"
         android:layout_below="@+id/etEditItem"
-        android:layout_alignLeft="@+id/etEditItem"
-        android:layout_alignStart="@+id/etEditItem" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>
