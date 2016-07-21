@@ -16,6 +16,10 @@ public class Item extends Model {
     @Column(name = "Name")
     public String name;
 
+    @Column(name = "dueDate")
+    public String dueDate;
+
+    public String defaultDueDate = "2011-01-01";
     // Make sure to have a default constructor for every ActiveAndroid model
     public Item(){
         super();
@@ -25,11 +29,19 @@ public class Item extends Model {
         super();
         this.remoteId = remoteId;
         this.name = name;
+        this.dueDate = defaultDueDate;
     }
 
     public Item( String name){
         super();
         this.name = name;
+        this.dueDate = defaultDueDate;
+    }
+
+    public Item( String name, String dueDate){
+        super();
+        this.name = name;
+        this.dueDate = dueDate;
     }
 
     public static List<Item> getAll() {
