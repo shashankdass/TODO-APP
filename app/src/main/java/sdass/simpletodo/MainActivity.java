@@ -36,9 +36,10 @@ public class MainActivity extends AppCompatActivity implements EditNameDialogFra
                 new AdapterView.OnItemLongClickListener() {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> Adapter, View item, int pos, long id) {
+                        Item itemToDelete = items.get(pos);
+                        itemToDelete.delete();
                         items.remove(pos);
                         itemsAdapter.notifyDataSetChanged();
-                        writeItemsToDB();
                         return true;
                     }
                 }
@@ -64,26 +65,17 @@ public class MainActivity extends AppCompatActivity implements EditNameDialogFra
         } catch (Exception e) {
             items = new ArrayList<Item>();
         }
-
-    }
-
-    private void writeItemsToDB() {
-        for (int i = 0; i < items.size(); i++) {
-            Item item = new Item();
-            item.name = items.get(i).name;
-            item.dueDate = items.get(i).dueDate;
-            item.priority = items.get(i).priority;
-            item.save();
-        }
     }
 
     public void onAddItem(View view) {
         EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
         String newItemText = etNewItem.getText().toString();
         if (!newItemText.equals("")) {
-            itemsAdapter.add(new Item(newItemText));
+            Item item = new Item(newItemText);
+            item.save();
+            items.add(item);
+            itemsAdapter.notifyDataSetChanged();
             etNewItem.setText("");
-            writeItemsToDB();
         } else {
             Toast.makeText(this, "Add a non-empty todo", Toast.LENGTH_SHORT).show();
         }
@@ -98,8 +90,13 @@ public class MainActivity extends AppCompatActivity implements EditNameDialogFra
 
     @Override
     public void onFinishEditDialog(String editedValue, String date, int pos, String priority) {
-        items.remove(pos);
-        items.add(pos, new Item(editedValue, date, priority));
+        Item itemToUpdate = items.get(pos);
+        itemToUpdate.dueDate = date;
+        itemToUpdate.name = editedValue;
+        itemToUpdate.priority = priority;
+        itemToUpdate.save();
         itemsAdapter.notifyDataSetChanged();
+
     }
+
 }
